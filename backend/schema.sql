@@ -36,5 +36,39 @@ CREATE TABLE "maintenance_types" (
   "interval_months" INTEGER,
   "notes" TEXT,
   PRIMARY KEY("id" AUTOINCREMENT)
+)
 
+CREATE TABLE "obd2_readings" (
+	"id"	INTEGER,
+	"car_id"	INTEGER,
+	"timestamp"	INTEGER,
+	"odometer"	INTEGER,
+	"fuel_level"	REAL,
+	"coolant_temp"	REAL,
+	"oil_temp"	REAL,
+	"engine_rpm"	REAL,
+	"horsepower"	REAL,
+	"mass_air_flow"	REAL,
+	PRIMARY KEY("id" AUTOINCREMENT),
+	FOREIGN KEY("car_id") REFERENCES "car"("id") ON DELETE CASCADE
+)
+
+CREATE TABLE "tyre_details" (
+	"id"	INTEGER,
+	"maintenance_record_id"	INTEGER NOT NULL,
+	"position"	TEXT NOT NULL,
+	"brand"	TEXT,
+	"size"	TEXT,
+	"notes"	TEXT,
+	PRIMARY KEY("id" AUTOINCREMENT),
+	FOREIGN KEY("maintenance_record_id") REFERENCES "maintenance_records"("id") ON DELETE CASCADE
+)
+
+
+CREATE TABLE "users" (
+	"id"	INTEGER,
+	"username"	TEXT NOT NULL,
+	"email"	TEXT NOT NULL UNIQUE,
+	"password_hash"	TEXT NOT NULL,
+	PRIMARY KEY("id" AUTOINCREMENT)
 )
