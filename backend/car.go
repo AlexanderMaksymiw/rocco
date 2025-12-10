@@ -201,5 +201,33 @@ func updateCarInfo(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Car successfully updated!"})
 }
 
+func deleteCar(c *gin.Context) {
+	userIDRaw, exists := c.Get("userID")
+	if !exists {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "user not found"})
+		return
+	}
 
+	userID := userIDRaw.(int)
 
+	tx, err := db.Begin()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not start transaction"})
+		return
+	}
+
+	_, err = tx.Exec("DELETE FROM car WHERE owner_id = ?", userID)
+	if err != nil {
+		tx.Rollback()
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not delete car"})
+		return
+	}
+
+	if err := tx.Commit(); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not commit transaction"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "car successfully deleted"})
+
+}
