@@ -11,29 +11,29 @@ import (
 )
 
 type Car struct {
-	ID                 int            `json:"id"`
-	Make               string         `json:"make"`
-	Model              string         `json:"model"`
-	Engine             string         `json:"engine"`
-	Year               string         `json:"year"`
-	Odometer           int            `json:"odometer"`
-	Vin                sql.NullString `json:"vin"`
-	Mot_due            sql.NullInt64  `json:"mot_due"`
-	Tax_due            sql.NullInt64  `json:"tax_due"`
-	Insured_until      sql.NullInt64  `json:"insured_until"`
-	Owner_id           int            `json:"owner_id"`
+	ID            int            `json:"id"`
+	Make          string         `json:"make"`
+	Model         string         `json:"model"`
+	Engine        string         `json:"engine"`
+	Year          string         `json:"year"`
+	Odometer      int            `json:"odometer"`
+	Vin           sql.NullString `json:"vin"`
+	Mot_due       sql.NullInt64  `json:"mot_due"`
+	Tax_due       sql.NullInt64  `json:"tax_due"`
+	Insured_until sql.NullInt64  `json:"insured_until"`
+	Owner_id      int            `json:"owner_id"`
 }
 
 type UpdateCarRequest struct {
-	Make               *string `json:"make"`
-	Model              *string `json:"model"`
-	Engine             *string `json:"engine"`
-	Year               *string `json:"year"`
-	Odometer           *int64  `json:"odometer"`
-	Vin                *string `json:"vin"`
-	Mot_due            *string `json:"mot_due"`
-	Tax_due            *string `json:"tax_due"`
-	Insured_until      *string `json:"insured_until"`
+	Make          *string `json:"make"`
+	Model         *string `json:"model"`
+	Engine        *string `json:"engine"`
+	Year          *string `json:"year"`
+	Odometer      *int64  `json:"odometer"`
+	Vin           *string `json:"vin"`
+	Mot_due       *string `json:"mot_due"`
+	Tax_due       *string `json:"tax_due"`
+	Insured_until *string `json:"insured_until"`
 }
 
 type CarRequest struct {
@@ -103,6 +103,16 @@ func AddCar(c *gin.Context) {
 	}
 	userID := userIDRaw.(int)
 
+	var existingCarID int64
+	err := db.QueryRow("SELECT id FROM car WHERE owner_id = ?", userID).Scan(&existingCarID)
+	if err == nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "User already has a car"})
+		return
+	} else if err != sql.ErrNoRows {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Database error"})
+		return
+	}
+
 	// Bind incoming JSON to CarRequest struct
 	var req CarRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -144,9 +154,9 @@ func updateCarInfo(c *gin.Context) {
 	}
 
 	dateFields := map[string]*string{
-		"mot_due":           request.Mot_due,
-		"tax_due":           request.Tax_due,
-		"insured_until":     request.Insured_until,
+		"mot_due":       request.Mot_due,
+		"tax_due":       request.Tax_due,
+		"insured_until": request.Insured_until,
 	}
 
 	parsedDates := make(map[string]int64)
