@@ -166,7 +166,6 @@ func updateCarMaintenance(c *gin.Context) {
 		dateDone,
 		mileage,
 		notes,
-		userID,
 		maintenanceID,
 		existing.CarId,
 	)
@@ -177,6 +176,22 @@ func updateCarMaintenance(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Maintenance record successfully updated"})
+
+	var currentOdometer int64
+	err = db.QueryRow("SELECT odometer FROM car WHERE id = ?", existing.CarId).Scan(&currentOdometer)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "car not found"})
+		return
+	}
+
+	if mileage > currentOdometer {
+		_, err := db.Exec("UPDATE car SET odometer = ? WHERE id = ?", mileage, existing.CarId)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update odometer"})
+			return
+		}
+	}
+
 }
 
 func addCarMaintenance(c *gin.Context) {
@@ -224,13 +239,28 @@ func addCarMaintenance(c *gin.Context) {
 		return
 	}
 
-	ID, _ := recordInsert.LastInsertId()
+	recordID, _ := recordInsert.LastInsertId()
 
 	c.JSON(http.StatusCreated, gin.H{
 		"message": "maintenance record added successfully",
-		"id":      ID,
+		"id":      recordID,
 	})
 
+	var currentOdometer int64
+	err = db.QueryRow("SELECT odometer FROM car WHERE id = ?", carID).Scan(&currentOdometer)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "car not found"})
+		return
+	}
+
+	if request.Mileage > currentOdometer {
+		_, err := db.Exec("UPDATE car SET odometer = ? WHERE id = ?", request.Mileage, carID)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update odometer"})
+			return
+		}
+
+	}
 }
 
 func getCarMaintenanceStats(c *gin.Context) {
