@@ -30,7 +30,7 @@ type UpdateMaintenanceRequest struct {
 	Notes    *string `json:"notes"`
 }
 
-func getCarMaintenace(c *gin.Context) {
+func getCarMaintenance(c *gin.Context) {
 	userID, exists := c.Get("userID")
 	if !exists {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "userID not found"})
@@ -231,4 +231,28 @@ func addCarMaintenance(c *gin.Context) {
 		"id":      ID,
 	})
 
+}
+
+func getCarMaintenanceStats(c *gin.Context) {
+	userIDRaw, exists := c.Get("userID")
+	if !exists {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "userID not found"})
+	}
+
+	userID := userIDRaw.(int)
+
+	var carID int
+	err := db.QueryRow("SELECT id FROM car WHERE owner_id = ?", userID).Scan(&carID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "no car of user found"})
+		return
+	}
+
+	stats, err := GetMaintenanceStatus(db, carID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "could not get stats"})
+		return
+	}
+
+	c.JSON(http.StatusOK, stats)
 }

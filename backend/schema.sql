@@ -6,8 +6,6 @@ CREATE TABLE "car" (
 	"year"	TEXT,
 	"odometer"	INTEGER,
 	"vin"	TEXT,
-	"last_service_miles"	INTEGER,
-	"last_service_date"	INTEGER,
 	"mot_due"	INTEGER,
 	"tax_due"	INTEGER,
 	"insured_until"	INTEGER,

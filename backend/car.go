@@ -16,10 +16,8 @@ type Car struct {
 	Model              string         `json:"model"`
 	Engine             string         `json:"engine"`
 	Year               string         `json:"year"`
-	Odometer           sql.NullInt64  `json:"odometer"`
+	Odometer           int            `json:"odometer"`
 	Vin                sql.NullString `json:"vin"`
-	Last_service_miles sql.NullInt64  `json:"last_service_miles"`
-	Last_service_date  sql.NullInt64  `json:"last_service_date"`
 	Mot_due            sql.NullInt64  `json:"mot_due"`
 	Tax_due            sql.NullInt64  `json:"tax_due"`
 	Insured_until      sql.NullInt64  `json:"insured_until"`
@@ -33,8 +31,6 @@ type UpdateCarRequest struct {
 	Year               *string `json:"year"`
 	Odometer           *int64  `json:"odometer"`
 	Vin                *string `json:"vin"`
-	Last_service_miles *int64  `json:"last_service_miles"`
-	Last_service_date  *string `json:"last_service_date"`
 	Mot_due            *string `json:"mot_due"`
 	Tax_due            *string `json:"tax_due"`
 	Insured_until      *string `json:"insured_until"`
@@ -70,7 +66,7 @@ func getCar(c *gin.Context) {
 
 	var car Car
 	row := db.QueryRow(`
-		SELECT id, make, model, engine, year, odometer, vin, last_service_miles, last_service_date, mot_due, tax_due, insured_until, owner_id
+		SELECT id, make, model, engine, year, odometer, vin, mot_due, tax_due, insured_until, owner_id
 		FROM car
 		WHERE owner_id = ?
 		ORDER BY id LIMIT 1
@@ -84,8 +80,6 @@ func getCar(c *gin.Context) {
 		&car.Year,
 		&car.Odometer,
 		&car.Vin,
-		&car.Last_service_miles,
-		&car.Last_service_date,
 		&car.Mot_due,
 		&car.Tax_due,
 		&car.Insured_until,
@@ -150,7 +144,6 @@ func updateCarInfo(c *gin.Context) {
 	}
 
 	dateFields := map[string]*string{
-		"last_service_date": request.Last_service_date,
 		"mot_due":           request.Mot_due,
 		"tax_due":           request.Tax_due,
 		"insured_until":     request.Insured_until,
@@ -178,15 +171,11 @@ func updateCarInfo(c *gin.Context) {
 	_, err := db.Exec(`
 		UPDATE car SET
 			odometer = ?,
-			last_service_miles = ?,
-			last_service_date = ?,
 			mot_due = ?,
 			tax_due = ?,
 			insured_until = ?
 		WHERE owner_id = ?`,
 		request.Odometer,
-		request.Last_service_miles,
-		parsedDates["last_service_date"],
 		parsedDates["mot_due"],
 		parsedDates["tax_due"],
 		parsedDates["insured_until"],
