@@ -70,3 +70,23 @@ CREATE TABLE "users" (
 	"password_hash"	TEXT NOT NULL,
 	PRIMARY KEY("id" AUTOINCREMENT)
 )
+
+CREATE TABLE reminder (
+
+id INTEGER PRIMARY KEY AUTOINCREMENT,
+user_id INTEGER NOT NULL,
+car_id INTEGER NOT NULL,
+reminder_type TEXT NOT NULL,
+title TEXT NOT NULL,
+message TEXT NOT NULL,
+due_date INTEGER,
+maintenance_record_id INTEGER,
+maintenance_type_id INTEGER,
+threshold_miles INTEGER,
+resolved INTEGER DEFAULT 0,
+created_at INTEGER NOT NULL,
+FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+FOREIGN KEY (car_id) REFERENCES car(id) ON DELETE CASCADE,
+FOREIGN KEY (maintenance_record_id) REFERENCES maintenance_records(id) ON DELETE CASCADE,
+FOREIGN KEY (maintenance_type_id) REFERENCES maintenance_types(id) ON DELETE CASCADE
+)

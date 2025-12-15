@@ -286,3 +286,53 @@ func getCarMaintenanceStats(c *gin.Context) {
 
 	c.JSON(http.StatusOK, stats)
 }
+
+func getCarMaintenanceReminders(c *gin.Context) {
+	userID := c.GetInt("userID")
+
+	var carID int
+	err := db.QueryRow("SELECT id FROM car WHERE owner_id = ?", userID).Scan(&carID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "car not found"})
+		return
+	}
+
+	if err := CreateReminders(userID, carID); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create reminders"})
+		return
+	}
+
+	rows, err := db.Query(`
+	SELECT id, title, message, due_date, threshold_miles
+	FROM reminder
+	WHERE user_id = ? AND car_id = ? AND resolved = 0
+	`, userID, carID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to load reminders"})
+		return
+	}
+	defer rows.Close()
+
+	var reminders []map[string]interface{}
+	for rows.Next() {
+		var (
+			id             int
+			title          string
+			message        string
+			dueDate        int64
+			thresholdMiles int
+		)
+
+		rows.Scan(&id, &title, &message, &dueDate, &thresholdMiles)
+
+		reminders = append(reminders, map[string]interface{}{
+			"id":              id,
+			"title":           title,
+			"message":         message,
+			"due_date":        dueDate,
+			"threshold_miles": thresholdMiles,
+		})
+	}
+
+	c.JSON(http.StatusOK, reminders)
+}
