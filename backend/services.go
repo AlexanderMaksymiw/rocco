@@ -102,7 +102,14 @@ func GetMaintenanceStatus(db *sql.DB, userID int) ([]MaintenanceStatusResponse, 
 
 func CreateReminders(userID int, carID int) error {
 	var car Car
-	err := db.QueryRow(`SELECT id, odometer, mot_due, tax_due, insured_until FROM car WHERE owner_id = ?`, userID).Scan(&car.ID, &car.Odometer, &car.Mot_due, &car.Tax_due, &car.Insured_until)
+	err := db.QueryRow(`
+	SELECT id,
+	odometer,
+	mot_due,
+	tax_due,
+	insured_until
+	FROM car WHERE owner_id = ?`,
+		userID).Scan(&car.ID, &car.Odometer, &car.Mot_due, &car.Tax_due, &car.Insured_until)
 	if err != nil {
 		return err
 	}
@@ -113,6 +120,12 @@ func CreateReminders(userID int, carID int) error {
 	FROM maintenance_records r
 	JOIN maintenance_types t ON r.type_id = t.id
 	WHERE r.car_id = ?
+		AND r.date_done = (
+				SELECT MAX(r2.date_done)
+				FROM maintenance_records r2
+				WHERE r2.car_id = r.car_id
+					AND r2.type_id = r.type_id
+		)
 	`, carID)
 	if err != nil {
 		return err
@@ -195,7 +208,41 @@ func CreateReminders(userID int, carID int) error {
 		}
 
 		if triggerMiles >= 0 || triggerTime >= 0 {
-			_, err := db.Exec(`
+
+			var existingID int
+			err := db.QueryRow(`
+        SELECT id
+        FROM reminder
+        WHERE user_id = ?
+          AND car_id = ?
+          AND maintenance_type_id = ?
+          AND resolved = 0
+        LIMIT 1
+    `, userID, carID, rec.Record.TypeId).Scan(&existingID)
+
+			if err == nil {
+				// reminder already exists, skip inserting
+				continue
+			}
+
+			if err != sql.ErrNoRows {
+				return err
+			}
+
+			_, err = db.Exec(`
+    UPDATE reminder
+    SET resolved = 1
+    WHERE user_id = ?
+      AND car_id = ?
+      AND maintenance_type_id = ?
+      AND resolved = 0
+`, userID, carID, rec.Record.TypeId)
+
+			if err != nil {
+				return err
+			}
+
+			_, err = db.Exec(`
 			INSERT INTO reminder
 			(user_id, car_id, reminder_type, title, message, due_date, maintenance_record_id, maintenance_type_id, threshold_miles, resolved, created_at)
 			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?)
@@ -211,6 +258,7 @@ func CreateReminders(userID int, carID int) error {
 				milesRem,
 				time.Now().Unix(),
 			)
+
 			if err != nil {
 				return err
 			}

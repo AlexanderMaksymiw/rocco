@@ -43,6 +43,6 @@ func main() {
 	router.POST("/maintenance", jwtRequired(), addCarMaintenance)
 	router.PATCH("/maintenace/:id", jwtRequired(), updateCarMaintenance)
 	router.GET("/maintenance/stats", jwtRequired(), getCarMaintenanceStats)
-	router.POST("/maintenance/reminder", jwtRequired(), getCarMaintenanceReminders)
+	router.GET("/maintenance/reminder", jwtRequired(), getReminders)
 	router.Run("localhost:8080")
 }
