@@ -31,6 +31,8 @@ func main() {
 		panic(err)
 	}
 
+	StartReminderCron()
+
 	router := gin.Default()
 	router.POST("/login", Login)
 	router.POST("/signup", Signup)
@@ -41,7 +43,7 @@ func main() {
 	router.DELETE("/car", jwtRequired(), deleteCar)
 	router.GET("/maintenance", jwtRequired(), getCarMaintenance)
 	router.POST("/maintenance", jwtRequired(), addCarMaintenance)
-	router.PATCH("/maintenace/:id", jwtRequired(), updateCarMaintenance)
+	router.PATCH("/maintenance/:id", jwtRequired(), updateCarMaintenance)
 	router.GET("/maintenance/stats", jwtRequired(), getCarMaintenanceStats)
 	router.GET("/maintenance/reminder", jwtRequired(), getReminders)
 	router.Run("localhost:8080")

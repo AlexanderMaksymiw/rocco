@@ -85,6 +85,7 @@ maintenance_type_id INTEGER,
 threshold_miles INTEGER,
 resolved INTEGER DEFAULT 0,
 created_at INTEGER NOT NULL,
+notified BOOLEAN NOT NULL DEFAULT 0
 FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
 FOREIGN KEY (car_id) REFERENCES car(id) ON DELETE CASCADE,
 FOREIGN KEY (maintenance_record_id) REFERENCES maintenance_records(id) ON DELETE CASCADE,

@@ -261,8 +261,9 @@ func addCarMaintenance(c *gin.Context) {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update odometer"})
 			return
 		}
-		_ = CreateReminders(userID, int(carID))
+
 	}
+	_ = CreateReminders(userID, int(carID))
 }
 
 func getCarMaintenanceStats(c *gin.Context) {
