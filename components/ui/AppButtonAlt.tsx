@@ -14,7 +14,7 @@ export default function AppButtonAlt({
   return (
     <Pressable
       onPress={onPress}
-      className={`bg-gray-600 py-3 px-36 rounded-4xl items-center justify-center ${className}`}
+      className={`bg-neutral-800 py-3 px-36 rounded-4xl items-center justify-center ${className}`}
     >
       <Text className="text-white text-center font-bold">{children}</Text>
     </Pressable>

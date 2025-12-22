@@ -7,6 +7,7 @@ import Heading from "@/components/ui/Appheading";
 import * as Google from "expo-auth-session/providers/google";
 import { useEffect } from "react";
 import { GoogleIcon } from "@/components/ui/IconSymbol";
+import { useTheme } from "@react-navigation/native";
 
 export default function SignUpScreen() {
   const [request, response, promptAsync] = Google.useIdTokenAuthRequest({
@@ -21,8 +22,10 @@ export default function SignUpScreen() {
     }
   }, [response]);
 
+  const { colors } = useTheme();
+
   return (
-    <View className="flex-1 px-6 gap-5">
+    <View className="flex-1 px-6 gap-5 bg-neutral-900">
       <Heading>Create an Account</Heading>
 
       <View className="pt-5">
@@ -34,22 +37,28 @@ export default function SignUpScreen() {
         </AppButtonIcon>
       </View>
 
+      <View className="flex-row items-center my-3">
+        <View className="flex-1 h-px bg-neutral-400" />
+        <Text className="mx-3 text-white">Or</Text>
+        <View className="flex-1 h-px bg-neutral-400" />
+      </View>
+
       <TextInput
-        className="border-b-gray-600 border-2 rounded-xl text-gray-200"
+        className="border-b-gray-600 border rounded-xl text-gray-200"
         placeholder="Username"
-        placeholderTextColor="#999"
+        placeholderTextColor="#C7C9CE"
         style={{ height: 55, paddingVertical: 10, paddingHorizontal: 15 }}
       />
       <TextInput
-        className="border-b-gray-600 border-2 rounded-xl text-gray-200"
+        className="border-b-gray-600 border rounded-xl text-gray-200"
         placeholder="Email"
-        placeholderTextColor="#999"
+        placeholderTextColor="#C7C9CE"
         style={{ height: 55, paddingVertical: 10, paddingHorizontal: 15 }}
       />
       <TextInput
-        className="border-b-gray-600 border-2 rounded-xl text-gray-200"
+        className="border-b-gray-600 border rounded-xl text-gray-200"
         placeholder="Password"
-        placeholderTextColor="#999"
+        placeholderTextColor="#C7C9CE"
         secureTextEntry={true}
         style={{ height: 55, paddingVertical: 10, paddingHorizontal: 15 }}
       />

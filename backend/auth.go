@@ -102,7 +102,6 @@ func Login(c *gin.Context) {
 }
 
 func DeleteAccount(c *gin.Context) {
-	// Get userID from JWT (set by AuthMiddleware)
 	userIDRaw, exists := c.Get("userID")
 	if !exists {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "User ID not found"})
@@ -110,14 +109,12 @@ func DeleteAccount(c *gin.Context) {
 	}
 	userID := userIDRaw.(int)
 
-	// Start a transaction
 	tx, err := db.Begin()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not start transaction"})
 		return
 	}
 
-	// Delete the user, cascading to all child tables
 	_, err = tx.Exec("DELETE FROM users WHERE id = ?", userID)
 	if err != nil {
 		tx.Rollback()
