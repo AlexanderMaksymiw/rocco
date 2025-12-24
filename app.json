@@ -4,7 +4,7 @@
     "slug": "rocco",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/Volkswagen-logo.png",
     "scheme": "rocco",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
